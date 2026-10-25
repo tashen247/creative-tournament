@@ -1,0 +1,39 @@
+{
+  "name": "creative-tournament",
+  "version": "0.1.0",
+  "description": "AI ad variants compete in a bracket judged by blind critic agents; a deterministic referee decides, a human crowns the winner.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "cli": "tsx src/cli.ts",
+    "start": "tsx src/main.ts",
+    "trace": "tsx src/traceReport.ts",
+    "evals": "tsx evals/run.ts"
+  },
+  "author": "Tashen Muthayan",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.310",
+    "@slack/web-api": "^8.2.0",
+    "better-sqlite3": "^13.0.3",
+    "fastify": "^5.12.7",
+    "googleapis": "^188.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
+  },
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.12"
+  }
+}
