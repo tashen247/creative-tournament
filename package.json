@@ -1,7 +1,21 @@
 {
   "name": "creative-tournament",
   "version": "0.1.0",
-  "description": "AI ad variants compete in a bracket judged by blind critic agents; a deterministic referee decides, a human crowns the winner.",
+  "description": "Ad variants compete in a bracket judged by blind critic agents; a deterministic referee decides each match, and a human crowns the winner in Slack.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tashen247/creative-tournament.git"
+  },
+  "keywords": [
+    "agents",
+    "multi-agent",
+    "llm-as-judge",
+    "n8n",
+    "slack",
+    "asana",
+    "marketing",
+    "typescript"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

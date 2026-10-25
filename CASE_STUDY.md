@@ -30,24 +30,6 @@ The first version of the spec had an orchestrator agent coordinating subagents. 
 - **Everything traced.** Every agent call writes a JSONL line with its role, match, presentation order, attempt, turns, cost and outcome. The bracket page shows every score and rationale.
 - **Tests without the model.** The unit tests swap the SDK for a stub that drives the real tool handlers, including invalid submissions, so the runner, tools, bracket and API are all exercised in CI without a model call.
 
-## Honest findings
+## Findings and results
 
-*To be filled in from `evals/results/` after the live runs.*
-
-- Position bias: how often the single-order winner flips when the ads are swapped, and how much swap-averaging in the final reduces that.
-- Critic consistency: how often the same match gets the same winner across five runs.
-- Where the compliance critic caught the implied-guarantee ad, and where it didn't.
-
-## Results
-
-*To be filled in from `evals/results/` after the live runs.*
-
-| Metric | Value |
-|---|---|
-| Cost per tournament (mean / max) | _pending_ |
-| Overt planted loser rejected | _pending_ |
-| Subtle planted loser disqualified | _pending_ |
-| Planted champion reached the final | _pending_ |
-| Human agreed with the panel | _pending_ |
-
-The human-agreement figure will come from a small number of runs that I judged myself. It's a sanity check, not a study, and I'll report the sample size next to it.
+Live eval results to follow. The harness is in place: `npm run evals` measures the planted-variant disqualification rate, critic consistency, the position-bias flip rate before and after swap-averaging, and cost per tournament. `npm run evals -- --dry` checks the wiring for free, and CI runs it on every push.

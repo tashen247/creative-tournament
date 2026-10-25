@@ -246,7 +246,8 @@ async function main(): Promise<void> {
   for (const name of names) {
     log(`\n▶ ${name}${dry ? " (dry)" : ""}`);
     const r = await EVALS[name](ctx);
-    log(`  ${r.pass ? "PASS" : "FAIL"} · ${r.summary}`);
+    // Dry numbers come from a fake panel, so there is nothing to pass or fail; it only proves the eval ran.
+    log(dry ? `  wired · ${r.summary} (dry: not a result)` : `  ${r.pass ? "PASS" : "FAIL"} · ${r.summary}`);
     results.push(r);
   }
 

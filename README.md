@@ -1,6 +1,8 @@
 # creative-tournament
 
-I built a bracket where AI-written ads compete, blind AI critics judge, and a human crowns the winner.
+![ci](https://github.com/tashen247/creative-tournament/actions/workflows/ci.yml/badge.svg)
+
+**I built a tournament for ad copy: eight concepts, a bracket judged by three blind critic agents, scores refereed in code, and one click in Slack to crown the winner, which then becomes an Asana task and a Google Doc brief.**
 
 <!-- Hero GIF goes here: the bracket filling in live, then the Slack click (20–30 s). See "Recording the demo" below. -->
 
@@ -8,7 +10,7 @@ Give it a creative brief. A generator agent writes eight ad concepts, each from 
 
 ## Why
 
-Generating ads is easy. Choosing between them is the hard part, so I built the choosing.
+In 20+ years of shipping systems, the hard part has rarely been producing options; it's choosing between them with evidence. Ads are no different: generating them is easy, so I built the choosing.
 
 Creative teams make dozens of variants and then pick winners on gut feel or pay for live tests to decide. LLM judges look like a cheap middle step, but they come with known problems: they favour whichever option they read first, they don't always agree with themselves, and a single "judge" prompt hides its reasoning. This project treats those as engineering problems: blind panels, a referee the model can't influence, swap-judging, and evals that measure how much any of it helps.
 
@@ -112,21 +114,17 @@ All of this lives in `src/bracket/` as pure functions, and every rule has a unit
 - A cumulative budget guard estimates each call before starting it and halts rather than pass `MAX_BUDGET_USD`. Each call is also capped at whatever budget is left.
 - After a halt or a crash, resume never re-judges a finished match, and partial scores for the unfinished one are discarded and collected again.
 
+Where to check these in the tests:
+- `tests/runner.test.ts` › blind critics: no critic's prompt contains another critic's score or rationale.
+- `tests/runner.test.ts` › crash and resume: a crash mid round 2, then resume, re-judges nothing that finished.
+- `tests/server.test.ts` › HTTP API: a bad crown token is rejected, and three concurrent crowns create one hand-off.
+
 ## What I learned about LLM judges
 
-These numbers come from `npm run evals`, which calls the model and writes `evals/results/<date>.json`. The table below is regenerated from that file on every full run.
+The numbers come from `npm run evals`, which calls the model and writes `evals/results/<date>.json`. A full run regenerates the table below from that file.
 
 <!-- EVALS:START -->
-_Not run yet. Run `npm run evals` to populate this table._
-
-| Eval | Target | Result |
-|---|---|---|
-| overt-loser | rejected by `save_variants` every time | _pending_ |
-| subtle-loser | disqualified in round 1 in ≥ 4/5 runs | _pending_ |
-| planted-champion | reaches the final in ≥ 3/5 runs | _pending_ |
-| consistency | ≥ 70% of matches agree in ≥ 4/5 runs | _pending_ |
-| position-bias | single-order vs swap-averaged flip rate | _pending_ |
-| cost | mean and max per tournament ≤ budget | _pending_ |
+_Live eval results to follow. `npm run evals -- --dry` checks the wiring for free, and CI runs it on every push._
 <!-- EVALS:END -->
 
 What each eval checks:
@@ -148,7 +146,7 @@ npm run lint
 npm test          # vitest; a stubbed agent caller drives the real tools, no model calls
 ```
 
-CI runs the same three on every push. No test touches the network or the model.
+CI runs the same three, plus `npm run evals -- --dry`, on every push. Nothing in CI touches the network or the model.
 
 ```
 src/bracket/     engine (state machine), scoring rules, bracket.html renderer
@@ -175,7 +173,6 @@ n8n/             workflow export
 - The judges score copy, not performance. The obvious next step is a feedback loop from real click-through rates, to see whether the panel's picks actually win.
 - Visual direction is text only. Generating image variants and judging them is the next big piece.
 - The generator works from the brief alone. Feeding it examples from the Meta Ad Library would give it real competitive context.
-- The human-agreement numbers will come from a handful of runs judged by me. That's a sanity check, not a study.
 
 ## Licence
 
