@@ -1,0 +1,35 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      PORT: "3000"
+      DB_PATH: /data/tournaments.db
+      RUNS_DIR: /data/runs
+      # Links sent to Slack must open in your browser, so this stays on localhost.
+      PUBLIC_BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - api_data:/data
+
+  n8n:
+    # Pin a version you have tested before relying on this in a demo.
+    image: n8nio/n8n:latest
+    environment:
+      # resumeUrl is built from WEBHOOK_URL, and the api container must be able to reach it.
+      WEBHOOK_URL: http://n8n:5678/
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      SLACK_CHANNEL_ID: ${SLACK_CHANNEL_ID:-}
+      GENERIC_TIMEZONE: Africa/Johannesburg
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n:/import:ro
+    depends_on:
+      - api
+
+volumes:
+  api_data:
+  n8n_data:
