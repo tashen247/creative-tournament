@@ -5,3 +5,4 @@ runs/*
 *.db-journal
 .env
 coverage/
+evals/results/dry-*

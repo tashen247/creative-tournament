@@ -3,7 +3,8 @@ import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { briefSchema } from "./briefSchema.js";
 import { loadConfig, loadDotEnv } from "./config.js";
-import { createContext, type AppContext } from "./context.js";
+import { createContext } from "./context.js";
+import { Store } from "./db.js";
 import { crownTournament } from "./crown.js";
 import { Runner } from "./runner/runner.js";
 import { tracePath } from "./runner/trace.js";
@@ -14,9 +15,8 @@ import type { SeedStrategy } from "./types.js";
 const ROLE = { brand: "Brand", performance: "Performance", compliance: "Compliance" } as const;
 const ROUND = { r1: "R1", r2: "SF", final: "Final" } as const;
 
-function printer(ctx: () => AppContext) {
+function printer(store: Store) {
   return (e: RunEvent) => {
-    const store = ctx().store;
     switch (e.type) {
       case "variants_saved": {
         console.log(`\n✓ ${e.saved}/8 variants saved`);
@@ -80,7 +80,8 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const resumeIdx = args.indexOf("--resume");
   const seedIdx = args.indexOf("--seed");
-  const briefPath = args.find((a, i) => !a.startsWith("--") && i !== resumeIdx + 1 && i !== seedIdx + 1);
+  const flagValues = new Set([resumeIdx, seedIdx].filter((i) => i >= 0).map((i) => i + 1));
+  const briefPath = args.find((a, i) => !a.startsWith("--") && !flagValues.has(i));
   if (resumeIdx < 0 && !briefPath) {
     console.error("Usage: npm run cli -- <brief.json> [--seed random|fixed]\n       npm run cli -- --resume <tournamentId>");
     process.exit(2);
@@ -91,9 +92,8 @@ async function main(): Promise<void> {
   }
 
   const config = loadConfig();
-  let ctxRef: AppContext | undefined;
-  const ctx = createContext(config, { onEvent: printer(() => ctxRef as AppContext) });
-  ctxRef = ctx;
+  const store = new Store(config.dbPath);
+  const ctx = createContext(config, { store, onEvent: printer(store) });
   const runner = new Runner(ctx);
 
   let id: string;

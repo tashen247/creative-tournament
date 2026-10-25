@@ -219,18 +219,27 @@ export class Runner {
 
   // ---- judging --------------------------------------------------------------------
 
+  /**
+   * Collect the blind panel's scores for a match in the given presentation
+   * orders, skipping any (role, order) already scored. Used by judgeMatch and
+   * by the position-bias eval.
+   */
+  async collectScores(t: Tournament, m: MatchState, orders: Order[]): Promise<void> {
+    const a = this.ctx.store.getVariant(m.a as string);
+    const b = this.ctx.store.getVariant(m.b as string);
+    for (const order of orders) {
+      for (const role of CRITIC_ROLES) {
+        if (!this.ctx.store.hasScore(m.id, role, order)) await this.runCritic(t, m, role, order, a, b);
+      }
+    }
+  }
+
   /** Judge one match: blind critics (both orders in the final), then the engine decides. */
   async judgeMatch(t: Tournament, m: MatchState): Promise<Resolution> {
     const { store, config } = this.ctx;
     const a = store.getVariant(m.a as string);
     const b = store.getVariant(m.b as string);
-    const orders: Order[] = m.round === "final" ? ["ab", "ba"] : ["ab"];
-
-    for (const order of orders) {
-      for (const role of CRITIC_ROLES) {
-        if (!store.hasScore(m.id, role, order)) await this.runCritic(t, m, role, order, a, b);
-      }
-    }
+    await this.collectScores(t, m, m.round === "final" ? ["ab", "ba"] : ["ab"]);
 
     const scores = store.listScores(m.id);
     const out = scoreMatch(scores, config.weights);
